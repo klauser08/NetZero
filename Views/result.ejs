@@ -1,0 +1,279 @@
+<%-include("partials/header") -%>
+
+<div class="row result-bg">
+    <div class="col-lg-6 ">
+        <div class="result-bg-1">
+            <h1 class="result-title">
+                Your Carbon Impact Is <%= footprint %> Kg of CO<sub>2</sub>
+            </h1>
+            <h3 class="result-sh">
+                Protecting <%= area %> acres of Tropical Forest can neutralise that amount of carbon dioxide.
+            </h3>
+        </div>
+        
+    </div>
+<div class="col-lg-6 ">
+<div class="result-bg-2">
+    <h1 class="result-tit">Restore Your Planet</h1>
+    <p class="result-par">Nature stands as our most powerful ally in the battle against climate change. However, we're witnessing the rapid loss of crucial ecosystems, sounding an urgent call to action.
+
+        To avert complete climate breakdown, we must act swiftly to halt the degradation and deforestation of habitats and commit to restoring nature. The planet teeters on the brink, and your help is vital.
+        
+        By neutralizing your footprint, you directly shield forests worldwide—a pivotal step in our fight against climate change.</p>
+</div>
+</div>
+</div>
+<div class="row compare">
+    <h1 class="result-title" style="color: black; text-align: center; text-shadow: 2px 2px rgb(177, 172, 172); padding-bottom: 1%;"> How Do You Compare?</h1>
+    <p style="text-align: center; font-weight: 300; font-family: 'roboto'; padding-bottom: 3%;">Here is your monthly carbon footprint</p>
+    <div class="col-lg-6 ">
+        <div class="chart" style="width: 60%;">
+            <canvas id="myChart"></canvas>
+         </div>
+    </div>
+    <div class="col-lg-6 world-col" style="margin: 0%;">
+        <div class="row">
+            <div class="col-lg-6">
+                <img src="/images/india.png" class="result-img" alt="" style="width: 80%;margin-top: 5%;">
+                <p class="india-para" style="font-size: 1.5rem;"><%= indiaResultSub %></p>
+            </div>
+            <div class="col-lg-6">
+                <img src="/images/world.png" alt="" class="result-img" style="width: 80%;margin-top: 5%;">
+                <p class="world-para" style="font-size: 1.5rem;">World Average Emission is 1567 Kg Of CO<sub>2</sub> </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- AI SUSTAINABILITY ADVISOR (RAG POWERED) SECTION -->
+<div class="container my-5" style="max-width: 900px;">
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                <h2 class="h3 fw-bold mb-0" style="font-family: 'Poppins', sans-serif;">
+                    <span style="font-size: 1.5rem;">🤖</span> NetZero AI Sustainability Advisor
+                </h2>
+                <span class="badge bg-white text-dark rounded-pill px-3 py-2 fw-semibold" style="font-size: 0.85rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    RAG Grounded Intelligence
+                </span>
+            </div>
+            <p class="mb-4 opacity-90" style="font-size: 1.05rem; line-height: 1.6;">
+                Get personalized, factual recommendations tailored specifically to your footprint breakdown, retrieved directly from our curated sustainability knowledge base.
+            </p>
+
+            <div class="text-center">
+                <button id="getAiAdviceBtn" class="btn btn-light btn-lg fw-bold rounded-pill px-4 py-3 shadow-sm text-success" onclick="fetchAiRecommendations()" style="transition: all 0.3s ease;">
+                    ✨ Get AI Personalised Recommendations
+                </button>
+            </div>
+
+            <!-- Loading Spinner State -->
+            <div id="aiLoadingState" class="text-center my-4 d-none">
+                <div class="spinner-border text-light mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="fw-semibold mb-0">Analyzing footprint breakdown & retrieving knowledge base context...</p>
+            </div>
+
+            <!-- AI Advice Output Card -->
+            <div id="aiAdviceOutput" class="mt-4 p-4 rounded-3 text-dark bg-white shadow-sm d-none">
+                <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap">
+                    <span id="groundingBadge" class="badge bg-success mb-2 px-3 py-2">Grounding: High</span>
+                    <small text-muted id="topCategoryTag" class="text-secondary fw-semibold"></small>
+                </div>
+
+                <div id="aiContentMarkdown" style="font-family: 'Roboto', sans-serif; line-height: 1.7; font-size: 1rem;">
+                    <!-- Rendered AI Recommendations -->
+                </div>
+
+                <!-- Sources & Citations Accordion -->
+                <div class="mt-4 pt-3 border-top">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#sourcesCollapse" aria-expanded="false">
+                        📚 View Retrieved RAG Sources & Chunks (<span id="sourceCount">0</span>)
+                    </button>
+                    <div class="collapse mt-3" id="sourcesCollapse">
+                        <div id="sourcesList" class="list-group list-group-flush small">
+                            <!-- Sources injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="aiErrorState" class="alert alert-danger mt-4 d-none" role="alert">
+                <strong id="aiErrorMessage">Unable to generate AI recommendations at this moment.</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="suggest">
+  <h1 style="text-align: center; font-family: poppins; padding-top: 2%;">Tips to Decrease Your Carbon Footprint</h1>
+  <div class="row">
+    <div class="col-lg-4 suggestions-col">
+      <img class="suggestions-image" src="/images/no-meat.png">
+      <div class="suggestions-text">
+        <h3>Institute meatless Mondays</h3>
+        <p>For every day of the week where you eliminate red meat</p>
+        <p><strong>33 kgs of CO<sub>2</sub> saved monthly</strong></p>
+      </div>
+    </div>
+    <div class="col-lg-4 suggestions-col">
+      <img class="suggestions-image" src="/images/clothes-hanger.png">
+      <div class="suggestions-text">
+        <h3>Purchase consignment clothing</h3>
+        <p>For buying second-hand or consignment for one out of every two clothing purchases:</p>
+        <p><strong>42 kgs of CO<sub>2</sub> saved monthly</strong></p>
+      </div>
+    </div>
+    <div class="col-lg-4 suggestions-col">
+      <img class="suggestions-image" src="/images/car-sharing.png">
+      <div class="suggestions-text">
+        <h3>Carpool Wednesday Wheels</h3>
+        <p>By carpooling with just one other person on Wednesdays</p>
+        <p><strong>108 kgs of CO<sub>2</sub> saved monthly</strong></p>
+      </div>
+    </div>
+    <div class="col-lg-4 suggestions-col">
+      <img class="suggestions-image" src="/images/mail-inbox.png">
+      <div class="suggestions-text">
+        <h3>Clean your inbox</h3>
+        <p>Delete your archived emails and unsubscribe from junk email:</p>
+        <p><strong> 6 kgs of CO<sub>2</sub> saved monthly</strong></p>
+      </div>
+    </div>
+    <div class="col-lg-4 suggestions-col">
+      <img class="suggestions-image" src="/images/fuel.png">
+      <div class="suggestions-text">
+        <h3>Improve your fuel economy</h3>
+        <p>For every 5 km/L you improve the fuel economy of your car:</p>
+        <p><strong>75 kgs of CO<sub>2</sub> saved monthly</strong></p>
+      </div>
+    </div>
+    <div class="col-lg-4 suggestions-col">
+      <img class="suggestions-image" src="/images/tire-inflation.png">
+      <div class="suggestions-text">
+        <h3>Keep inflated</h3>
+        <p>By keeping your car tires properly inflated:</p>
+        <p><strong>33 kgs of CO<sub>2</sub> saved monthly</strong></p>
+      </div>
+    </div>
+  </div>
+
+
+<div class="d-grid gap-2 d-md-block bottom-results" style="text-align: center; padding-bottom:3%">
+    <a href="/offset" style="margin-right: 2%;"><button id="button" class="btn btn-primary" type="button" value= "<%= percentages %>" >Offset My FootPrint</button></a>
+    <a href="/calculator" style="margin-right: 2%;"><button class="btn btn-outline-success" type="button">🔄 Calculate New Footprint</button></a>
+    <a href="/"><button class="btn btn-secondary" type="button">Go To Home</button></a>
+  </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    const ctx = document.getElementById('myChart');
+    data1= document.getElementById("button").value;
+    data2=[];
+    var string=''
+    for( i=0;i<data1.length;i++)
+    {
+      if(data1[i]==',')
+      {
+        data2.push(parseFloat(string));
+        string='';
+      }
+      else
+      string =string+data1[i]
+    }
+    data2.push(parseFloat(string))
+
+    new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ['Electricity', 'Gas', 'Travel', 'Food',],
+        datasets: [{
+          label: '% Contribution',
+          data: data2,
+          borderWidth: 1
+        }]
+      },
+    });
+
+    async function fetchAiRecommendations() {
+        const btn = document.getElementById('getAiAdviceBtn');
+        const loading = document.getElementById('aiLoadingState');
+        const output = document.getElementById('aiAdviceOutput');
+        const errorState = document.getElementById('aiErrorState');
+        const markdownDiv = document.getElementById('aiContentMarkdown');
+        const groundingBadge = document.getElementById('groundingBadge');
+        const topCatTag = document.getElementById('topCategoryTag');
+        const sourcesList = document.getElementById('sourcesList');
+        const sourceCount = document.getElementById('sourceCount');
+
+        btn.classList.add('d-none');
+        loading.classList.remove('d-none');
+        output.classList.add('d-none');
+        errorState.classList.add('d-none');
+
+        try {
+            const response = await fetch('/api/ai/recommendations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    footprint: Number("<%= footprint %>") || 0,
+                    percentages: data2
+                })
+            });
+
+            const data = await response.json();
+            loading.classList.add('d-none');
+
+            if (!response.ok || data.error) {
+                throw new Error(data.error || "Failed to fetch AI advice");
+            }
+
+            // Convert basic Markdown headers and bold text to HTML
+            let formattedHtml = data.recommendationsMarkdown
+                .replace(/^### (.*$)/gim, '<h4 class="fw-bold text-success mt-3 mb-2">$1</h4>')
+                .replace(/^## (.*$)/gim, '<h3 class="fw-bold text-dark mt-3 mb-2">$1</h3>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/^[-*]\s+(.*$)/gim, '<li class="mb-2">$1</li>');
+
+            markdownDiv.innerHTML = formattedHtml;
+            groundingBadge.innerText = `Grounding: ${data.groundingConfidence}`;
+            topCatTag.innerText = `Primary Driver: ${data.topCategory}`;
+
+            // Render Sources
+            sourcesList.innerHTML = '';
+            sourceCount.innerText = data.sources ? data.sources.length : 0;
+
+            if (data.sources && data.sources.length > 0) {
+                data.sources.forEach(src => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item bg-light border-0 mb-2 rounded';
+                    item.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 fw-bold text-dark">${src.title} (Chunk ${src.chunk})</h6>
+                            <small class="text-success fw-bold">${src.similarityScore}% Match</small>
+                        </div>
+                        <p class="mb-1 text-muted small">"${src.snippet}"</p>
+                        <small class="text-secondary" style="font-size: 0.75rem;">Source File: ${src.file}</small>
+                    `;
+                    sourcesList.appendChild(item);
+                });
+            }
+
+            output.classList.remove('d-none');
+            btn.innerText = '🔄 Refresh AI Recommendations';
+            btn.classList.remove('d-none');
+        } catch (err) {
+            loading.classList.add('d-none');
+            errorState.classList.remove('d-none');
+            document.getElementById('aiErrorMessage').innerText = err.message || "Unable to reach AI service.";
+            btn.classList.remove('d-none');
+        }
+    }
+  </script>
+  
+<%-include("partials/footer") -%>
