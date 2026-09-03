@@ -7,12 +7,10 @@ const _ = require("lodash");
 require("dotenv").config();
 const stripe=require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 const path = require('path');
-const passport = require('passport');
 const session = require('express-session');
 const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');
 const aiRoutes = require('./routes/aiRoutes');
-const router = express.Router();
 
 var t = 0;
 app.use(express.json());
@@ -42,12 +40,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("Public"));
 app.set('trust proxy', 1);
 
+if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET is required');
+}
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'netzero_secret_key',
-    resave: false, // Add this line to explicitly set resave to false
-    saveUninitialized: true, // Add this line to explicitly set saveUninitialized to true
-    store: MongoStore.create({ mongoUrl: mongoUrl }) // Use MongoDB as session store
+    name: 'netzero.sid',
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({ mongoUrl }),
+    cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 1000 * 60 * 60 * 24
+    }
 }));
+
+app.use(function(req, res, next) {
+    res.locals.currentUser = req.session.userId
+        ? { id: req.session.userId, username: req.session.username }
+        : null;
+    next();
+});
 
 app.use(function(req, res, next) {
     if (!req.session) {
@@ -144,6 +160,14 @@ app.get("/login",function(req,res)
 });
 app.post("/",function(req,res){
     res.render("home");
+});
+
+app.post("/logout", function(req, res, next) {
+    req.session.destroy(function(error) {
+        if (error) return next(error);
+        res.clearCookie("netzero.sid");
+        return res.redirect("/login");
+    });
 })
 
 
@@ -179,9 +203,6 @@ app.post("/signup", async function (req, res) {
       res.status(500).json({ error: "Failed to create user" });
     }
 });
-
-var user;
-
 app.post("/login", async function (req, res) {
     const { loginUsername, loginPassword } = req.body;
 
@@ -189,28 +210,34 @@ app.post("/login", async function (req, res) {
         // Find the user by username
         user = await User.findOne({ username: loginUsername });
 
-        console.log(user);
-        console.log(loginUsername);
-        // Check if user exists
+        // Use one generic response so callers cannot discover valid usernames.
         if (!user) {
-            console.log("User not found");
             return res.render("login", { error: "Invalid username or password" });
         }
 
-        // Compare the provided password with the hashed password stored in the database
         const isPasswordMatch = await bcrypt.compare(loginPassword, user.password);
 
-        if (isPasswordMatch) {
-            // Passwords match, user authenticated successfully
-            // Redirect the user to a dashboard or another page upon successful login
-            t=1;
-            console.log("User authenticated successfully");
-            res.redirect("/");
-        } else {
-            // Passwords do not match
-            console.log("Invalid password");
+        if (!isPasswordMatch) {
             return res.render("login", { error: "Invalid username or password" });
         }
+
+        // Rotate the session identifier after authentication to prevent fixation.
+        req.session.regenerate(function(sessionError) {
+            if (sessionError) {
+                console.error("Unable to create authenticated session:", sessionError);
+                return res.status(500).render("login", { error: "Unable to log in. Please try again." });
+            }
+
+            req.session.userId = user._id.toString();
+            req.session.username = user.username;
+            req.session.save(function(saveError) {
+                if (saveError) {
+                    console.error("Unable to save authenticated session:", saveError);
+                    return res.status(500).render("login", { error: "Unable to log in. Please try again." });
+                }
+                return res.redirect("/");
+            });
+        });
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -398,8 +425,6 @@ app.get("/faq",function(req,res)
     res.render('faq', { faqItems: faqItems });
 });
 
-module.exports = router;
-
 app.get("/calculator",function(req,res)
 {
     res.render("calculator");
@@ -463,22 +488,21 @@ app.post("/calculator", async function(req, res) {
             indiaResultSub = "Your Emission levels are below India's average by " + Math.floor((580 - footprint) / 5.80) + "%";
         }
 
-        if (t && typeof user !== 'undefined' && user && user._id) {
+        if (req.session.userId) {
             try {
-                let calculateData = await CalculateData.findOne({ user: user._id });
-                if (!calculateData) {
-                    calculateData = new CalculateData({
-                        user: user._id,
+                const authenticatedUser = await User.findById(req.session.userId);
+                if (authenticatedUser) {
+                    const calculateData = await CalculateData.create({
+                        id: authenticatedUser._id.toString(),
                         footPrint: footprint,
                         datae: elecPct,
                         datac: cylPct,
                         travel: travelPct,
                         dataf: foodPct
                     });
-                    await calculateData.save();
+                    authenticatedUser.calculateData = calculateData._id;
+                    await authenticatedUser.save();
                 }
-                user.calculateData = calculateData._id;
-                await user.save();
             } catch (dbErr) {
                 console.error('Error updating calculateData:', dbErr.message);
             }
