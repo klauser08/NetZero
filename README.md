@@ -47,12 +47,33 @@
 
 ---
 
+## 🔐 Authentication Flow
+
+NetZero uses a deliberately small server-side authentication design:
+
+1. Signup passwords are salted and hashed with bcrypt before MongoDB storage.
+2. Login verifies the submitted password against the stored hash.
+3. A successful login rotates the session ID and stores only the user's ID and username in the session.
+4. Session data is stored in MongoDB; the browser receives an HTTP-only, SameSite session cookie.
+5. Logout destroys the server-side session and clears the cookie.
+
+No JWT or social OAuth flow is used. The calculator remains available without an account; authenticated users can associate results with their account.
+
+```
+Browser form -> Express auth route -> bcrypt verification
+                                  -> MongoDB-backed session -> signed cookie
+```
+
+Run the focused password tests with `npm test`, and run JavaScript syntax checks with `npm run check`.
+
+---
+
 ## 🚀 Quick Setup & Installation
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/NetZero-AI-Advisor.git
-cd NetZero-AI-Advisor
+git clone https://github.com/klauser08/NetZero.git
+cd NetZero
 ```
 
 ### 2. Install Dependencies
