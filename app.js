@@ -12,7 +12,6 @@ const mongoose = require('mongoose');
 const MongoStore = require('connect-mongo');
 const aiRoutes = require('./routes/aiRoutes');
 
-var t = 0;
 app.use(express.json());
 app.use('/api/ai', aiRoutes);
 
@@ -208,7 +207,7 @@ app.post("/login", async function (req, res) {
 
     try {
         // Find the user by username
-        user = await User.findOne({ username: loginUsername });
+        const user = await User.findOne({ username: loginUsername });
 
         // Use one generic response so callers cannot discover valid usernames.
         if (!user) {
