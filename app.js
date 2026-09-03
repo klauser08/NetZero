@@ -2,7 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const app = express();
-const bcrypt = require("bcrypt");
+const { hashPassword, verifyPassword } = require("./services/passwordService");
 const _ = require("lodash");
 require("dotenv").config();
 const stripe=require("stripe")(process.env.STRIPE_PRIVATE_KEY);
@@ -182,7 +182,7 @@ app.post("/signup", async function (req, res) {
     
     try {
       // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await hashPassword(password);
   
       // Create a new user instance
       const newUser = new User({
@@ -214,7 +214,7 @@ app.post("/login", async function (req, res) {
             return res.render("login", { error: "Invalid username or password" });
         }
 
-        const isPasswordMatch = await bcrypt.compare(loginPassword, user.password);
+        const isPasswordMatch = await verifyPassword(loginPassword, user.password);
 
         if (!isPasswordMatch) {
             return res.render("login", { error: "Invalid username or password" });
