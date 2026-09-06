@@ -1,0 +1,224 @@
+<%-include("partials/header") -%>
+
+  <div class=" calc-bg" >
+    <h1 class="sign-up-heading" style="text-align: center;">Calculate Your Footprint</h1>
+    
+    <div id="steps">
+      <form action="/calculator" method="post" onkeydown="handleFormKeyDown(event)">
+      <div class="step" id="step1">
+        <h2>Step 1: Enter Household Information</h2>
+        
+            <div class="mb-3 calc-input">
+              <label for="numpeople" class="form-label">Number of people in your house <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" name="numpeople" required min="1" placeholder="e.g. 4">
+            </div>
+            <div class="mb-3 calc-input">
+              <label for="electricity" class="form-label">Electricity used per month (in KW/h) <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" name="electricity" required min="0" placeholder="e.g. 250 (enter 0 if none)">
+            </div>
+            <div class="mb-3 calc-input">
+                <label for="cylinders" class="form-label">Number of cylinders of l.p.g. used last month <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" name="cylinders" required min="0" placeholder="e.g. 1 (enter 0 if none)">
+              </div>
+              <div class="d-grid gap-2">
+            
+              
+          <button type="button" class="btn btn-primary next-button" onclick="nextStep()">Next</button>
+        </div>
+
+    
+      
+      </div>
+      
+      
+      <div class="step" id="step2" style="display: none;">
+        <h2>Step 2: Enter Travel Information</h2>
+        
+            <div class="mb-3 calc-input">
+              <label for="flight" class="form-label">Flight Time (in hours) last month <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" placeholder="e.g. 2 (enter 0 if none)" min="0" name="flights">
+            </div>
+            <div class="mb-3 calc-input">
+              <label for="vehicle-distance" class="form-label">Average Distance travelled by your vehicle (in kms) last month <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" placeholder="e.g. 300 (enter 0 if none)" min="0" name="vehicle">
+            </div>
+            <div class="mb-3 calc-input">
+              <label for="mileage" class="form-label">Mileage of your Vehicle (km/L)</label>
+              <input type="number" class="form-control" placeholder="e.g. 15 (default 15 if no car)" min="1" name="mileage">
+            </div>
+            <div class="mb-3 calc-input">
+              <label for="bus" class="form-label">Distance Travelled in Bus (in kms) Last Month <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" placeholder="e.g. 50 (enter 0 if none)" min="0" name="bus">
+            </div>
+            <div class="mb-3 calc-input">
+              <label for="train" class="form-label">Distance Travelled By Train (in kms) Last Month <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" placeholder="e.g. 100 (enter 0 if none)" min="0" name="train">
+            </div>
+
+            <div class="d-grid gap-2">
+            
+              
+              <button type="button" class="btn btn-primary next-button" onclick="nextStep()">Next</button>
+            </div>
+      </div>
+        
+      
+      <div class="step" id="step3" style="display: none;">
+        <h2>Step 3: Dietary Preference</h2>
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="meatLover" value="re" id="diet1">
+            <label class="form-check-label" for="diet1">
+              Meat Lover
+            </label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="omnivore" value="re" id="diet2" checked>
+            <label class="form-check-label" for="diet2">
+              Average Omnivore
+            </label>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="vegetarian" value="re" id="diet3">
+            <label class="form-check-label" for="diet3">
+              Vegetarian
+            </label>
+          </div>
+            
+        </div>
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="vegan" value="re" id="diet4">
+            <label class="form-check-label" for="diet4">
+              Vegan
+            </label>
+          </div>
+        </div>
+        
+            <div class="d-grid gap-2">
+            
+              
+              <button type="button" class="btn btn-primary next-button" onclick="nextStep()">Next</button>
+            </div>
+          
+           
+      </div>
+
+      <div class="step" id="step4" style="display: none;">
+        <h2>Step 4: Recycling Habits</h2>
+            <div class="mb-3">
+              <input class="form-check-input" type="checkbox" value="re" name="newspaper" id="flexCheckDefault1">
+              <label for="flexCheckDefault1" class="form-check-label">Recycle Newspaper</label>
+            </div>
+            <div class="mb-3">
+              <input class="form-check-input" type="checkbox" value="re" name="Aluminium" id="flexCheckDefault2">
+                <label for="flexCheckDefault2" class="form-check-label">Recycle Aluminium</label>
+            </div>
+            <div class="mb-3 ">
+              <input class="form-check-input" type="checkbox" value="re" name="Plastic" id="flexCheckDefault3">
+                <label for="flexCheckDefault3" class="form-check-label">Recycle Plastic</label>
+                
+            </div>
+            <div class="mb-3" >
+              <input class="form-check-input" type="checkbox" value="re" name="Glass" id="flexCheckDefault4">
+                <label for="flexCheckDefault4" class="form-check-label">Recycle Glass</label>
+                
+            </div>
+            <div class="d-grid gap-2">
+            
+            
+            <button type="submit" class="btn btn-primary next-button">Calculate Carbon Impact</button>
+          </div>
+          
+           
+      </div>
+
+    </form>
+    </div>
+      
+    </div>
+
+  
+  <script>
+    const steps = document.querySelectorAll('.step');
+    let currentStep = 0;
+
+    function handleFormKeyDown(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (currentStep < steps.length - 1) {
+          nextStep();
+        } else {
+          document.querySelector('form').submit();
+        }
+      }
+    }
+
+    function validateCurrentStep() {
+      if (currentStep === 0) {
+        const numPeople = document.querySelector('input[name="numpeople"]');
+        const electricity = document.querySelector('input[name="electricity"]');
+        const cylinders = document.querySelector('input[name="cylinders"]');
+
+        if (!numPeople || !numPeople.value.trim() || Number(numPeople.value) <= 0) {
+          alert("Please enter the number of people in your house (minimum 1).");
+          if (numPeople) numPeople.focus();
+          return false;
+        }
+        if (!electricity || electricity.value.trim() === '') {
+          alert("Please enter electricity usage in kWh (enter 0 if none).");
+          if (electricity) electricity.focus();
+          return false;
+        }
+        if (!cylinders || cylinders.value.trim() === '') {
+          alert("Please enter LPG cylinders used last month (enter 0 if none).");
+          if (cylinders) cylinders.focus();
+          return false;
+        }
+      } else if (currentStep === 1) {
+        const flights = document.querySelector('input[name="flights"]');
+        const vehicle = document.querySelector('input[name="vehicle"]');
+        const bus = document.querySelector('input[name="bus"]');
+        const train = document.querySelector('input[name="train"]');
+
+        if (!flights || flights.value.trim() === '') {
+          alert("Please enter flight time in hours (enter 0 if none).");
+          if (flights) flights.focus();
+          return false;
+        }
+        if (!vehicle || vehicle.value.trim() === '') {
+          alert("Please enter vehicle distance in kms (enter 0 if none).");
+          if (vehicle) vehicle.focus();
+          return false;
+        }
+        if (!bus || bus.value.trim() === '') {
+          alert("Please enter bus travel distance in kms (enter 0 if none).");
+          if (bus) bus.focus();
+          return false;
+        }
+        if (!train || train.value.trim() === '') {
+          alert("Please enter train travel distance in kms (enter 0 if none).");
+          if (train) train.focus();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function nextStep() {
+      if (!validateCurrentStep()) {
+        return; // Block step transition until current step inputs are completed!
+      }
+
+      if (currentStep < steps.length - 1) {
+        steps[currentStep].style.display = 'none';
+        currentStep++;
+        steps[currentStep].style.display = 'block';
+      }
+    }
+  </script>
+<%- include("partials/footer") -%>
