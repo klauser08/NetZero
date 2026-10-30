@@ -63,7 +63,8 @@ const storeItems = new Map([
 
 
 // Account routes require storage and are intentionally disabled in the demo.
-app.all(['/signup', '/login'], (req, res) => res.status(503).send('Accounts are unavailable in demo mode. The carbon calculator remains available at /calculator.'));
+app.get(['/signup', '/login'], (req, res) => res.redirect(302, '/calculator'));
+app.post(['/signup', '/login'], (req, res) => res.redirect(303, '/calculator'));
 app.post('/', (req, res) => res.redirect('/'));
 
 app.get("/about",function(req,res)
