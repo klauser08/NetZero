@@ -5,12 +5,12 @@ const app = express();
 const bcrypt = require("bcrypt");
 const _ = require("lodash");
 require("dotenv").config();
-const stripe=require("stripe")(process.env.STRIPE_PRIVATE_KEY);
+// Payments disabled in demo mode.
 const path = require('path');
 const passport = require('passport');
 const session = require('express-session');
-const mongoose = require('mongoose');
-const MongoStore = require('connect-mongo');
+
+
 const aiRoutes = require('./routes/aiRoutes');
 const router = express.Router();
 
@@ -18,12 +18,7 @@ var t = 0;
 app.use(express.json());
 app.use('/api/ai', aiRoutes);
 
-const mongoUrl = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/netzeroDB';
-mongoose.connect(mongoUrl);
-
-const db = mongoose.connection;
-
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+// Database connection removed for the public demo.
 
 app.use(express.static(path.join(__dirname, 'views')));
 // Set view engine as EJS
@@ -43,26 +38,13 @@ app.use(express.static("Public"));
 app.set('trust proxy', 1);
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'netzero_secret_key',
-    resave: false, // Add this line to explicitly set resave to false
-    saveUninitialized: true, // Add this line to explicitly set saveUninitialized to true
-    store: MongoStore.create({ mongoUrl: mongoUrl }) // Use MongoDB as session store
+    secret: process.env.SESSION_SECRET || 'local-dev-only-change-me',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' }
 }));
 
-app.use(function(req, res, next) {
-    if (!req.session) {
-        return next(new Error('Oh no')) // Handle error
-    }
-    next(); // Otherwise continue
-});
-
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-    console.log("Connected to MongoDB!");
-});
-
-module.exports = db;
-
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok', mode: 'demo' }));
 
 const storeItems = new Map([
     [1,{price:1875,name:"Flight Offsets"}],
@@ -80,143 +62,9 @@ const storeItems = new Map([
 
 
 
-const calculateDataSchema = new mongoose.Schema({
-    id: String,
-    footPrint: String,
-    datae: Number,
-    datac: Number,
-    travel: Number,
-    dataf: Number
-});
-
-const CalculateData = mongoose.model('CalculateData', calculateDataSchema);
-
-const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        lowercase: true,
-        required: [true, "can't be blank"]
-     },
-    mobno: {
-        type: Number,
-        match: /^\d{10}$/, // This regex matches exactly 10 digits
-        required: [true, 'Mobile number is required'],
-        unique: true,
-    },
-    username: {
-        type: String,
-        lowercase: true,
-        required: [true, "can't be blank"],
-        match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
-        index: true,
-        unique: true
-     },
-     email: {
-        type: String,
-        lowercase: true,
-        required: [true, "can't be blank"],
-        match: [/\S+@\S+\.\S+/, 'is invalid'],
-        index: true
-     },
-     password: {
-        type: String,
-        required: [true, 'Password is required'],
-        minlength: [6, 'Password must be at least 6 characters long'],
-     },
-     confirmPassword: String,
-     calculateData: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'CalculateData'
-    }
-});
-
-const User = mongoose.model("User", userSchema);
-
-
-app.get("/signup",function(req,res)
-{
-    res.render("signup");
-});
-
-app.get("/login",function(req,res)
-{
-    res.render("login");
-});
-app.post("/",function(req,res){
-    res.render("home");
-})
-
-
-
-
-app.post("/signup", async function (req, res) {
-    const { name, mobno, username, email, password, confirmPassword } = req.body;
-  
-    // Check if passwords match
-    if (password !== confirmPassword) {
-      return res.render("signup", { error: "Passwords do not match" });
-    }
-    
-    try {
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // Create a new user instance
-      const newUser = new User({
-        name,
-        mobno,
-        username,
-        email,
-        password: hashedPassword,
-      });
-  
-      // Save the user to the database
-      await newUser.save();
-  
-      res.redirect("/login"); // Redirect to login page after signup
-    } catch (error) {
-        console.error(error);
-      res.status(500).json({ error: "Failed to create user" });
-    }
-});
-
-var user;
-
-app.post("/login", async function (req, res) {
-    const { loginUsername, loginPassword } = req.body;
-
-    try {
-        // Find the user by username
-        user = await User.findOne({ username: loginUsername });
-
-        console.log(user);
-        console.log(loginUsername);
-        // Check if user exists
-        if (!user) {
-            console.log("User not found");
-            return res.render("login", { error: "Invalid username or password" });
-        }
-
-        // Compare the provided password with the hashed password stored in the database
-        const isPasswordMatch = await bcrypt.compare(loginPassword, user.password);
-
-        if (isPasswordMatch) {
-            // Passwords match, user authenticated successfully
-            // Redirect the user to a dashboard or another page upon successful login
-            t=1;
-            console.log("User authenticated successfully");
-            res.redirect("/");
-        } else {
-            // Passwords do not match
-            console.log("Invalid password");
-            return res.render("login", { error: "Invalid username or password" });
-        }
-    } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
+// Account routes require storage and are intentionally disabled in the demo.
+app.all(['/signup', '/login'], (req, res) => res.status(503).send('Accounts are unavailable in demo mode. The carbon calculator remains available at /calculator.'));
+app.post('/', (req, res) => res.redirect('/'));
 
 app.get("/about",function(req,res)
 {
@@ -319,40 +167,7 @@ app.post("/industry-calculator",function(req,res){
 });
 
 
-app.post("/create-checkout-session", async (req,res )=> {
-    
-    try{
-        
-            const session =await stripe.checkout.sessions.create({
-               payment_method_types: ["card"],
-               mode:"payment",
-               line_items:req.body.items.map(item => {
-                const storeItem =storeItems.get(item.id)
-                return{
-                    price_data:{
-                    currency: 'inr',
-                product_data:{
-                    name: storeItem.name
-                },
-                unit_amount:storeItem.price
-            },
-            quantity:item.quantity,
-            
-                    
-                 }
-               }),
-               success_url: "${process.env.SERVER_URL}/success.ejs",
-               cancel_url:"${process.env.SERVER_URL}/cancel.ejs",
-              
-        })
-        res.json({url:session.url})
-    }
-    catch (e)
-    {
-        res.status(500).json({error: e.message})
-    }
-    
-});
+app.post('/create-checkout-session', (req, res) => res.status(503).json({ error: 'Payments are disabled in demo mode.' }));
 
 app.get("/faq",function(req,res)
 {
@@ -461,27 +276,6 @@ app.post("/calculator", async function(req, res) {
         } else {
             indiaResult = "Great! Keep it UP";
             indiaResultSub = "Your Emission levels are below India's average by " + Math.floor((580 - footprint) / 5.80) + "%";
-        }
-
-        if (t && typeof user !== 'undefined' && user && user._id) {
-            try {
-                let calculateData = await CalculateData.findOne({ user: user._id });
-                if (!calculateData) {
-                    calculateData = new CalculateData({
-                        user: user._id,
-                        footPrint: footprint,
-                        datae: elecPct,
-                        datac: cylPct,
-                        travel: travelPct,
-                        dataf: foodPct
-                    });
-                    await calculateData.save();
-                }
-                user.calculateData = calculateData._id;
-                await user.save();
-            } catch (dbErr) {
-                console.error('Error updating calculateData:', dbErr.message);
-            }
         }
 
         req.session.calculatorResult = {
