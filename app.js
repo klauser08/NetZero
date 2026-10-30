@@ -524,7 +524,8 @@ app.get("/team",function(req,res)
 
 app.post("")
 
-app.listen(3000,function()
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", function()
 {
-    console.log("Server Started on port on 3000");
+    console.log(`Server started on port ${PORT}`);
 });
